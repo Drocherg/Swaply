@@ -1,0 +1,7 @@
+{
+  "name": "Swaply",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
