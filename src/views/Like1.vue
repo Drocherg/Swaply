@@ -63,7 +63,7 @@
           <ion-button class="footer-button active">
             <ion-icon :icon="heart" />
           </ion-button>
-          <ion-button class="add-button">
+          <ion-button class="add-button" @click="goToPost">
             <ion-icon :icon="add" />
           </ion-button>
           <ion-button class="footer-button">
@@ -201,6 +201,9 @@ const sendMessage = () => {
 
 const goToHome = () => {
   router.push('/home1');
+};
+const goToPost = () => {
+  router.push('/Post1');
 };
 </script>
 

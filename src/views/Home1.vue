@@ -76,7 +76,7 @@
             <ion-button class="footer-button" @click="goToLike">
               <ion-icon :icon="heart" />
             </ion-button>
-            <ion-button class="add-button">
+            <ion-button class="add-button" @click="goToAdd">
               <ion-icon :icon="add" />
             </ion-button>
             <ion-button class="footer-button">
@@ -275,9 +275,15 @@ import router from '@/router';
     // Por ejemplo, mostrar/ocultar elementos basados en la posición del scroll
     console.log('Scroll position:', scrollTop);
   };
+
   const goToLike = () => {
   router.push('/Like1');
-};
+  };
+
+  const goToAdd = () => {
+  router.push('/Post1');
+  };
+
   </script>
   
   <style scoped>

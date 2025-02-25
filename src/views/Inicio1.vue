@@ -2,14 +2,12 @@
   <ion-page>
     <ion-header class="ion-no-border">
       <ion-toolbar class="transparent-toolbar">
-        <ion-title>Swaply</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content :fullscreen="true" class="gradient-background">
       <div id="container" class="animate-fade-in">
         <strong class="logo-text">Swaply</strong>
-        <p class="welcome-text">Welcome to the future of swapping</p>
       </div>
     </ion-content>
   </ion-page>

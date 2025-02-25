@@ -7,13 +7,16 @@ import Inicio4 from '@/views/Inicio4.vue';
 import Inicio5 from '@/views/Inicio5.vue';
 import Inicio6 from '@/views/Inicio6.vue';
 import Login1 from '@/views/Login1.vue';
-import Login2 from '@/views/Login2.vue';
 import Login3 from '@/views/Login3.vue';
 import InicioLogin1 from '@/views/InicioLogin1.vue';
 import InicioLoginAyuda1 from '@/views/InicioLoginAyuda1.vue';
 import InicioRegister1 from '@/views/InicioRegister1.vue';
 import Home1 from '@/views/Home1.vue';
 import Like1 from '@/views/Like1.vue';
+import Post1 from '@/views/Post1.vue';
+import Post2 from '@/views/Post2.vue';
+import MyProducts1 from '@/views/MyProducts1.vue';
+
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -56,11 +59,6 @@ const routes: Array<RouteRecordRaw> = [
     component: Login1
   },
   {
-    path: '/Login2',
-    name: 'Login2',
-    component: Login2
-  },
-  {
     path: '/Login3',
     name: 'Login3',
     component: Login3
@@ -90,7 +88,21 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Like1',
     component: Like1
   },
-
+  {
+    path: '/Post1',
+    name: 'Post1',
+    component: Post1
+  },
+  {
+    path: '/Post2',
+    name: 'Post2',
+    component: Post2
+  },
+  {
+    path: '/MyProducts1',
+    name: 'MyProducts1',
+    component: MyProducts1
+  },
 ]
 
 const router = createRouter({
