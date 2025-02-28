@@ -1,76 +1,67 @@
 <template>
   <ion-page>
-    <ion-header class="ion-no-border">
-      <ion-toolbar class="transparent-toolbar">
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content :fullscreen="true" class="gradient-background">
-      <div id="container" class="animate-fade-in">
-        <strong class="logo-text">Swaply</strong>
+    <ion-content :fullscreen="true" class="gradient-bg">
+      <div class="splash-container">
+        <h1 class="logo-text">Swaply</h1>
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { 
-  IonContent, 
-  IonHeader, 
-  IonPage, 
-  IonTitle, 
-  IonToolbar 
-} from '@ionic/vue';
+import { IonPage, IonContent } from '@ionic/vue';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+onMounted(() => {
+  // Navigate to home after animation completes
+  setTimeout(() => {
+    router.replace('/Login3');
+  }, 3500); // Animation duration + small delay
+});
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap');
 
-.gradient-background {
-  --background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%);
+.gradient-bg {
+  --background: linear-gradient(180deg, #4FC3F7 0%, #2196F3 100%);
 }
 
-.transparent-toolbar {
-  --background: transparent;
-  --color: white;
-}
-
-#container {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+.splash-container {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
 .logo-text {
   font-family: 'Caveat', cursive;
   font-size: 4rem;
   color: white;
-  display: block;
-  margin-bottom: 1rem;
-}
-
-.welcome-text {
-  font-size: 1.1rem;
-  line-height: 22px;
-  color: rgba(255, 255, 255, 0.9);
   margin: 0;
+  animation: slideLeft 2s ease-in-out forwards;
+  position: relative;
+  white-space: nowrap;
 }
 
-.animate-fade-in {
-  animation: fadeIn 1s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
+@keyframes slideLeft {
+  0% {
+    transform: translateX(0);
     opacity: 0;
-    transform: translateY(-45%);
   }
-  to {
+  20% {
     opacity: 1;
-    transform: translateY(-50%);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100vw);
+    opacity: 0;
   }
 }
 </style>

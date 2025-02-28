@@ -1,9 +1,194 @@
+<script setup lang="ts">
+import { ref, onMounted, computed, nextTick } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonContent, 
+  IonFooter,
+  IonButtons,
+  IonButton,
+  IonIcon,
+  IonAvatar,
+  IonInput,
+  IonLabel,
+  IonTextarea,
+  IonToast,
+} from '@ionic/vue';
+import {
+  settings,
+  search,
+  helpCircle,
+  home,
+  heart,
+  add,
+  mail,
+  checkmark,
+  paperPlaneOutline,
+} from 'ionicons/icons';
+import { useProductsStore } from '@/store/products';
+
+const route = useRoute();
+const router = useRouter();
+const productsStore = useProductsStore();
+
+// Form state
+const productPhoto = ref('');
+const additionalPhotos = ref<string[]>([]);
+const price = ref('');
+const title = ref('');
+const description = ref('');
+const showToast = ref(false);
+const toastMessage = ref('');
+
+// Chat state
+const showHelpChat = ref(false);
+const newMessage = ref('');
+const chatMessages = ref([
+  { type: 'received', text: '¡Hola! ¿En qué puedo ayudarte?' },
+]);
+
+// Simular un ID de usuario actual (en una app real, esto vendría de la autenticación)
+const currentUserId = 1;
+
+// Get photos from route params
+onMounted(() => {
+  if (route.params.mainPhoto) {
+    productPhoto.value = route.params.mainPhoto as string;
+  }
+  if (route.params.additionalPhotos) {
+    try {
+      additionalPhotos.value = JSON.parse(route.params.additionalPhotos as string);
+    } catch (e) {
+      console.error('Error parsing additionalPhotos:', e);
+      additionalPhotos.value = [];
+    }
+  }
+});
+
+// Computed properties
+const isFormValid = computed(() => {
+  return price.value && title.value && description.value;
+});
+
+// Help chat functions
+const toggleHelpChat = () => {
+  showHelpChat.value = !showHelpChat.value;
+};
+
+const closeHelpChat = () => {
+  showHelpChat.value = false;
+};
+
+const sendMessage = async () => {
+  if (!newMessage.value.trim()) return;
+
+  // Guardar el mensaje del usuario antes de limpiar el campo
+  const userMessage = newMessage.value.trim();
+
+  // Añadir el mensaje del usuario
+  chatMessages.value.push({
+    type: 'sent',
+    text: userMessage,
+  });
+
+  // Limpiar el campo de entrada
+  newMessage.value = '';
+
+  // Desplazarse al último mensaje
+  await nextTick();
+  const chatContent = document.querySelector('.help-chat-content');
+  if (chatContent) {
+    chatContent.scrollTop = chatContent.scrollHeight;
+  }
+
+  // Simular una respuesta automática después de 1 segundo
+  setTimeout(() => {
+    let response = 'Gracias por tu mensaje. Un agente te responderá pronto.';
+
+    // Respuestas automáticas basadas en el contenido del mensaje
+    if (userMessage.toLowerCase().includes('precio')) {
+      response = 'Para establecer un precio adecuado, investiga el valor de mercado de productos similares y considera el estado de tu artículo.';
+    } else if (userMessage.toLowerCase().includes('título')) {
+      response = 'Un buen título debe ser claro y descriptivo. Incluye palabras clave relevantes para que los usuarios encuentren tu producto fácilmente.';
+    } else if (userMessage.toLowerCase().includes('descripción')) {
+      response = 'La descripción debe ser detallada. Incluye información sobre el estado del producto, características clave y cualquier detalle que pueda ser útil para el comprador.';
+    } else if (userMessage.toLowerCase().includes('foto')) {
+      response = 'Asegúrate de que las fotos sean claras y bien iluminadas. Muestra el producto desde diferentes ángulos y resalta cualquier detalle importante.';
+    } else if (userMessage.toLowerCase().includes('ayuda')) {
+      response = '¿Necesitas ayuda con algo en particular? Puedo ayudarte con consejos sobre precios, títulos, descripciones y fotos.';
+    }
+
+    // Añadir la respuesta del bot
+    chatMessages.value.push({
+      type: 'received',
+      text: response,
+    });
+
+    // Desplazarse al último mensaje
+    nextTick(() => {
+      if (chatContent) {
+        chatContent.scrollTop = chatContent.scrollHeight;
+      }
+    });
+  }, 1000);
+};
+
+// Navigation functions
+const goToHome = () => {
+  router.push('/Home1');
+};
+
+const goToFavorites = () => {
+  router.push('/Like1');
+};
+const goToMyProducts = () => {
+  router.push('/MyProducts1');
+};
+const goToAjustes = () => router.push('/Ajustes1');
+
+// Form submission
+const publishProduct = () => {
+  if (!isFormValid.value) return;
+
+  // Crear el objeto de producto para guardar en el store
+  const newProduct = {
+    title: title.value,
+    price: `${price.value}€`,
+    image: productPhoto.value,
+    additionalImages: additionalPhotos.value,
+    description: description.value,
+    distance: '0Km', // Esto podría calcularse en base a la ubicación del usuario
+    userId: currentUserId, // Usar el ID del usuario actual
+  };
+
+  try {
+    // Añadir el producto al store y obtener el ID generado
+    const productId = productsStore.addProduct(newProduct);
+    
+    // Mostrar mensaje de éxito
+    toastMessage.value = '¡Producto publicado con éxito!';
+    showToast.value = true;
+    
+    // Redirigir a MyProducts1 después de un breve retraso
+    setTimeout(() => {
+      router.push('/MyProducts1');
+    }, 1500);
+  } catch (error) {
+    console.error('Error al publicar el producto:', error);
+    toastMessage.value = 'Error al publicar el producto. Inténtalo de nuevo.';
+    showToast.value = true;
+  }
+};
+</script>
+
 <template>
   <ion-page>
     <ion-header class="ion-no-border">
       <ion-toolbar class="custom-toolbar">
         <ion-buttons slot="start">
-          <ion-avatar class="header-avatar">
+          <ion-avatar class="header-avatar" @click="goToMyProducts">
             <img src="https://i.pravatar.cc/300" alt="User avatar" />
           </ion-avatar>
         </ion-buttons>
@@ -13,7 +198,7 @@
         </div>
 
         <ion-buttons slot="end">
-          <ion-button>
+          <ion-button @click="goToAjustes">
             <ion-icon :icon="settings" />
           </ion-button>
         </ion-buttons>
@@ -95,7 +280,7 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-footer>
-
+    
     <!-- Help Chat Modal -->
     <div v-if="showHelpChat" class="help-chat-overlay" @click="closeHelpChat">
       <div class="help-chat" @click.stop>
@@ -130,160 +315,18 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast para notificaciones -->
+    <ion-toast
+      :is-open="showToast"
+      :message="toastMessage"
+      :duration="2000"
+      @didDismiss="showToast = false"
+    ></ion-toast>
   </ion-page>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonContent,
-  IonFooter,
-  IonButtons,
-  IonButton,
-  IonIcon,
-  IonAvatar,
-  IonInput,
-  IonLabel,
-  IonTextarea,
-} from '@ionic/vue';
-import {
-  settings,
-  search,
-  helpCircle,
-  home,
-  heart,
-  add,
-  mail,
-  checkmark,
-  paperPlaneOutline,
-} from 'ionicons/icons';
-
-const route = useRoute();
-const router = useRouter();
-
-// Form state
-const productPhoto = ref('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-zJkAzdEGJH5QfPFYUWnka9N29kWWNw.png'); // Imagen por defecto
-const price = ref('');
-const title = ref('');
-const description = ref('');
-
-// Chat state
-const showHelpChat = ref(false);
-const newMessage = ref('');
-const chatMessages = ref([
-  { type: 'received', text: '¡Hola! ¿En qué puedo ayudarte?' },
-]);
-
-// Obtener las fotos de los parámetros de ruta al montar el componente
-onMounted(() => {
-  if (route.query.mainPhoto) {
-    productPhoto.value = route.query.mainPhoto as string;
-  }
-  if (route.query.additionalPhotos) {
-    const additionalPhotos = JSON.parse(route.query.additionalPhotos as string);
-    console.log('Fotos adicionales:', additionalPhotos);
-  }
-});
-
-// Computed properties
-const isFormValid = computed(() => {
-  return price.value && title.value && description.value;
-});
-
-// Help chat functions
-const toggleHelpChat = () => {
-  showHelpChat.value = !showHelpChat.value;
-};
-
-const closeHelpChat = () => {
-  showHelpChat.value = false;
-};
-
-const sendMessage = async () => {
-  if (!newMessage.value.trim()) return;
-
-  // Guardar el mensaje del usuario antes de limpiar el campo
-  const userMessage = newMessage.value.trim();
-
-  // Añadir el mensaje del usuario
-  chatMessages.value.push({
-    type: 'sent',
-    text: userMessage,
-  });
-
-  // Limpiar el campo de entrada
-  newMessage.value = '';
-
-  // Desplazarse al último mensaje
-  await nextTick();
-  const chatContent = document.querySelector('.help-chat-content');
-  if (chatContent) {
-    chatContent.scrollTop = chatContent.scrollHeight;
-  }
-
-  // Simular una respuesta automática después de 1 segundo
-  setTimeout(() => {
-    let response = 'Gracias por tu mensaje. Un agente te responderá pronto.';
-
-    // Respuestas automáticas basadas en el contenido del mensaje
-    if (userMessage.toLowerCase().includes('precio')) {
-      response = 'Para establecer un precio adecuado, investiga el valor de mercado de productos similares y considera el estado de tu artículo.';
-    } else if (userMessage.toLowerCase().includes('título')) {
-      response = 'Un buen título debe ser claro y descriptivo. Incluye palabras clave relevantes para que los usuarios encuentren tu producto fácilmente.';
-    } else if (userMessage.toLowerCase().includes('descripción')) {
-      response = 'La descripción debe ser detallada. Incluye información sobre el estado del producto, características clave y cualquier detalle que pueda ser útil para el comprador.';
-    } else if (userMessage.toLowerCase().includes('foto')) {
-      response = 'Asegúrate de que las fotos sean claras y bien iluminadas. Muestra el producto desde diferentes ángulos y resalta cualquier detalle importante.';
-    } else if (userMessage.toLowerCase().includes('ayuda')) {
-      response = '¿Necesitas ayuda con algo en particular? Puedo ayudarte con consejos sobre precios, títulos, descripciones y fotos.';
-    }
-
-    // Añadir la respuesta del bot
-    chatMessages.value.push({
-      type: 'received',
-      text: response,
-    });
-
-    // Desplazarse al último mensaje
-    nextTick(() => {
-      if (chatContent) {
-        chatContent.scrollTop = chatContent.scrollHeight;
-      }
-    });
-  }, 1000);
-};
-
-// Navigation functions
-const goToHome = () => {
-  router.push('/Home1');
-};
-
-const goToFavorites = () => {
-  router.push('/Like1');
-};
-
-// Form submission
-const publishProduct = () => {
-  if (!isFormValid.value) return;
-
-  const productData = {
-    photo: productPhoto.value,
-    price: price.value,
-    title: title.value,
-    description: description.value,
-  };
-
-  console.log('Publishing product:', productData);
-  router.push('/Home1');
-};
-</script>
-
 <style scoped>
-/* Estilos completos del segundo componente */
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap');
 
 .custom-toolbar {
@@ -337,7 +380,8 @@ const publishProduct = () => {
 .search-input {
   --padding-start: 0.5rem;
   --padding-end: 0.5rem;
-  --placeholder-color: #9ca3af;
+  --placeholder-color: #000000;
+  color: #000000;
 }
 
 .help-button {

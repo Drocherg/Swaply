@@ -3,7 +3,7 @@
     <ion-header class="ion-no-border">
       <ion-toolbar class="custom-toolbar">
         <ion-buttons slot="start">
-          <ion-avatar class="header-avatar">
+          <ion-avatar class="header-avatar" @click="goToMyProducts">
             <img src="https://i.pravatar.cc/300" alt="User avatar" />
           </ion-avatar>
         </ion-buttons>
@@ -13,7 +13,7 @@
         </div>
 
         <ion-buttons slot="end">
-          <ion-button>
+          <ion-button @click="goToAjustes">
             <ion-icon :icon="settings" />
           </ion-button>
         </ion-buttons>
@@ -66,7 +66,7 @@
           <ion-button class="add-button" @click="goToPost">
             <ion-icon :icon="add" />
           </ion-button>
-          <ion-button class="footer-button">
+          <ion-button class="footer-button" @click="goToNoti">
             <ion-icon :icon="mail" />
           </ion-button>
         </ion-buttons>
@@ -205,6 +205,11 @@ const goToHome = () => {
 const goToPost = () => {
   router.push('/Post1');
 };
+const goToNoti = () => router.push('/Noti1');
+const goToAjustes = () => router.push('/Ajustes1');
+const goToMyProducts = () => {
+  router.push('/MyProducts1');
+};
 </script>
 
 <style scoped>
@@ -261,7 +266,8 @@ const goToPost = () => {
 .search-input {
   --padding-start: 0.5rem;
   --padding-end: 0.5rem;
-  --placeholder-color: #9CA3AF;
+  --placeholder-color: #000000;
+  color: #000000;
 }
 
 .help-button {
@@ -358,7 +364,7 @@ const goToPost = () => {
 }
 
 .add-button {
-  --background: #9333EA;
+  --background: #6B7280;
   --color: white;
   --padding-start: 0.75rem;
   --padding-end: 0.75rem;
@@ -503,3 +509,4 @@ const goToPost = () => {
   }
 }
 </style>
+

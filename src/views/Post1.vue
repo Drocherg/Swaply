@@ -3,7 +3,7 @@
     <ion-header class="ion-no-border">
       <ion-toolbar class="custom-toolbar">
         <ion-buttons slot="start">
-          <ion-avatar class="header-avatar">
+          <ion-avatar class="header-avatar" @click="goToMyProducts">
             <img src="https://i.pravatar.cc/300" alt="User avatar" />
           </ion-avatar>
         </ion-buttons>
@@ -13,7 +13,7 @@
         </div>
 
         <ion-buttons slot="end">
-          <ion-button>
+          <ion-button @click="goToAjustes">
             <ion-icon :icon="settings" />
           </ion-button>
         </ion-buttons>
@@ -99,12 +99,46 @@
           <ion-button class="add-button active">
             <ion-icon :icon="add" />
           </ion-button>
-          <ion-button class="footer-button">
+          <ion-button class="footer-button" @click="goToNoti">
             <ion-icon :icon="mail" />
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-footer>
+
+    <!-- Help Chat Modal -->
+    <div v-if="showHelpChat" class="help-chat-overlay" @click="closeHelpChat">
+      <div class="help-chat" @click.stop>
+        <div class="help-chat-header">
+          <div class="help-avatar">
+            <span>SOS</span>
+          </div>
+          <div class="help-message">
+            ¿En qué puedo ayudarte con la subida de fotos?
+          </div>
+        </div>
+        <div class="help-chat-content" ref="chatContent">
+          <div
+            v-for="(message, index) in chatMessages"
+            :key="index"
+            :class="['message', message.type]"
+          >
+            {{ message.text }}
+          </div>
+        </div>
+        <div class="help-chat-input">
+          <ion-input
+            v-model="newMessage"
+            placeholder="Escribe tu mensaje..."
+            class="message-input"
+            @keyup.enter="sendMessage"
+          />
+          <ion-button fill="clear" class="send-button" @click="sendMessage">
+            <ion-icon :icon="paperPlaneOutline" />
+          </ion-button>
+        </div>
+      </div>
+    </div>
   </ion-page>
 </template>
 
@@ -156,6 +190,44 @@ const toggleHelpChat = () => {
   showHelpChat.value = !showHelpChat.value;
 };
 
+const closeHelpChat = () => {
+  showHelpChat.value = false;
+};
+
+const sendMessage = () => {
+  if (!newMessage.value.trim()) return;
+
+  // Añadir el mensaje del usuario
+  chatMessages.value.push({
+    type: 'sent',
+    text: newMessage.value,
+  });
+
+  // Simular una respuesta automática después de 1 segundo
+  setTimeout(() => {
+    let response = 'Gracias por tu mensaje. Un agente te responderá pronto.';
+
+    // Respuestas automáticas basadas en el contenido del mensaje
+    const message = newMessage.value.toLowerCase();
+    if (message.includes('foto principal')) {
+      response = 'La foto principal es la imagen destacada de tu producto. Asegúrate de que sea clara y atractiva.';
+    } else if (message.includes('fotos adicionales')) {
+      response = 'Puedes subir hasta 6 fotos adicionales para mostrar más detalles de tu producto.';
+    } else if (message.includes('subir')) {
+      response = 'Para subir fotos, haz clic en los espacios vacíos o en la foto principal.';
+    }
+
+    // Añadir la respuesta del bot
+    chatMessages.value.push({
+      type: 'received',
+      text: response,
+    });
+  }, 1000);
+
+  // Limpiar el campo de entrada
+  newMessage.value = '';
+};
+
 const selectMainPhoto = () => {
   mainPhotoInput.value?.click();
 };
@@ -204,12 +276,15 @@ const removeAdditionalPhoto = (index: number) => {
 const confirmUpload = () => {
   if (!mainPhoto.value) return;
 
-  // Pasar las fotos como parámetros de ruta
+  // Filtrar las fotos adicionales para eliminar los valores nulos
+  const filteredAdditionalPhotos = additionalPhotos.value.filter(photo => photo !== null);
+
+  // Navegar a Post2 con las fotos como parámetros
   router.push({
-    path: '/Post2',
-    query: {
+    name: 'Post2',
+    params: {
       mainPhoto: mainPhoto.value,
-      additionalPhotos: JSON.stringify(additionalPhotos.value),
+      additionalPhotos: JSON.stringify(filteredAdditionalPhotos),
     },
   });
 };
@@ -221,10 +296,14 @@ const goToHome = () => {
 const goToFavorites = () => {
   router.push('/Like1');
 };
+const goToNoti = () => router.push('/Noti1');
+const goToAjustes = () => router.push('/Ajustes1');
+const goToMyProducts = () => {
+  router.push('/MyProducts1');
+};
 </script>
 
 <style scoped>
-/* Estilos completos del primer componente */
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap');
 
 .custom-toolbar {
@@ -278,7 +357,8 @@ const goToFavorites = () => {
 .search-input {
   --padding-start: 0.5rem;
   --padding-end: 0.5rem;
-  --placeholder-color: #9ca3af;
+  --placeholder-color: #000000;
+  color: #000000;
 }
 
 .help-button {
@@ -405,83 +485,101 @@ const goToFavorites = () => {
 
 /* Help Chat Styles */
 .help-chat-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .help-chat {
+    width: 90%;
+    max-width: 400px;
+    height: 80vh;
+    background: white;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .help-chat-header {
+    background: #2B95D6;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .help-avatar {
+    width: 40px;
+    height: 40px;
+    background: #FF0000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .help-message {
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .help-chat-content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background: #F0F2F5;
+  }
+  
+  .message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 1rem;
+    max-width: 80%;
+  }
+  
+  .message.sent {
+    background: #030403;
+    margin-left: auto;
+    border-top-right-radius: 0;
+  }
+  
+  .message.received {
+    background: rgb(0, 0, 0);
+    margin-right: auto;
+    border-top-left-radius: 0;
+  }
+  
+  .help-chat-input {
+    padding: 1rem;
+    background: white;
+    border-top: 1px solid #E5E7EB;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .message-input {
+    --background: #000000;
+    --border-radius: 1.5rem;
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+  }
+  
+  .send-button {
+    --color: #2B95D6;
+    font-size: 1.5rem;
+  }
 
-.help-chat {
-  width: 90%;
-  max-width: 400px;
-  height: 80vh;
-  background: white;
-  border-radius: 1rem;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.help-chat-header {
-  background: #2b95d6;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.help-avatar {
-  width: 40px;
-  height: 40px;
-  background: #ff0000;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-}
-
-.help-message {
-  color: rgb(0, 0, 0);
-  font-size: 1rem;
-}
-
-.help-chat-content {
-  flex: 1;
-  padding: 1rem;
-  overflow-y: auto;
-  background: #f0f2f5;
-}
-
-.message {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  border-radius: 1rem;
-  max-width: 80%;
-  opacity: 0;
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-.message.sent {
-  background: #9333ea;
-  color: white;
-  margin-left: auto;
-  border-top-right-radius: 0;
-}
-
-.message.received {
-  background: #e5e7eb;
-  color: black;
-  margin-right: auto;
-  border-top-left-radius: 0;
-}
 
 @keyframes fadeIn {
   from {
